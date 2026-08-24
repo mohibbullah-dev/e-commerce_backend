@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import userRoute from "./routes/user.route.js";
 import DB_Connection from "./db/index.js";
+import { apiError } from "./utils/api.error.js";
 
 const app = express();
 app.use(express.json());
@@ -36,3 +37,21 @@ DB_Connection()
   .catch((error) => {
     console.error(`MONGODB connection failed ${error}`);
   });
+
+// Global error handler
+
+app.use((err, req, res, next) => {
+  let error = err;
+
+  if (!(error instanceof apiError)) {
+    const statusCode = error.statusCode;
+    const message = error.message || "something went wrong";
+    error = new apiError(statusCode, message, error?.errors || [], err.stack);
+  }
+
+  return res.status(error.statusCode || 500).json({
+    success: error.success || false,
+    message: error.message,
+    errors: error.errors,
+  });
+});
