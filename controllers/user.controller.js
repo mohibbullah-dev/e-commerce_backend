@@ -17,18 +17,15 @@ const adminLogin = asyncHander(async (req, res) => {
   if ([email, password].some((fields) => fields.trim() === "")) {
     throw new apiError(400, "ALl fields are required");
   }
-  console.log(
-    "hello i am in adminLogin before db qurey in controller function",
-  );
+
   const user = await User.findOne({ email: email });
-  console.log(user);
-  console.log("hello i am in adminLogin after db qurey in controller function");
-  console.log(user);
+
   if (!user) {
     throw new apiError(404, "user not found");
   }
 
   const isMatchPass = await user.isCorrectPassword(password);
+
   if (!isMatchPass) throw new apiError(400, "incorrect password");
 
   const accessToken = await user.accessToken();
@@ -37,16 +34,18 @@ const adminLogin = asyncHander(async (req, res) => {
     httpOnly: true,
     secure: true,
     sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   };
-
-  console.log(
-    "hello i am in adminLogin before response in controller function",
-  );
 
   return res
     .status(201)
     .cookie("accessToken", accessToken, option)
-    .json(new apiResponse(200, user, "login successfully done"));
+    .json(
+      new apiResponse(200, "login successfully done", {
+        user,
+        token: accessToken,
+      }),
+    );
 });
 
 export { adminLogin };

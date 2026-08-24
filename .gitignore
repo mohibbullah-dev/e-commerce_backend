@@ -1,5 +1,6 @@
 # Dependencies
 /node_modules
+/personal_notes
 
 # Environment variables (Secrets)
 .env

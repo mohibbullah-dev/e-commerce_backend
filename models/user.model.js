@@ -53,4 +53,10 @@ userSchema.methods.accessToken = async function () {
   });
 };
 
+userSchema.methods.toJSON = function () {
+  const user = this.toObject();
+  delete user.password;
+  return user;
+};
+
 export const User = mongoose.model("User", userSchema);
