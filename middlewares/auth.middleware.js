@@ -1,7 +1,7 @@
 import { User } from "../models/user.model.js";
 import { apiError } from "../utils/api.error.js";
 import jwt from "jsonwebtoken";
-import { asyncHander } from "../utils/asyncHander";
+import { asyncHander } from "../utils/asyncHander.js";
 const verifyToken = asyncHander(async (req, _, next) => {
   // get token from cookies / headers
   // validate token
@@ -27,7 +27,7 @@ const verifyToken = asyncHander(async (req, _, next) => {
     req.user = user;
     next();
   } catch (error) {
-    throw new apiError(400, `invalid accessToken token ${error}`);
+    throw new apiError(400, `invalid accessToken ${error}`);
   }
 });
 

@@ -48,4 +48,13 @@ const adminLogin = asyncHander(async (req, res) => {
     );
 });
 
-export { adminLogin };
+// get_user start from here
+const get_user = asyncHander(async (req, res) => {
+  const user = req?.user;
+
+  res
+    .status(200)
+    .json(new apiResponse(200, "user fetched successfully", { user }));
+});
+
+export { adminLogin, get_user };
