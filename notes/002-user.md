@@ -2,7 +2,7 @@
 
 - user schecma is created
 - adminLogin controler created,
-- this methood has ben used for hiding password before sending respons to user.
+- this methood has been used for hiding password before sending respons to user.
   _like:_
 
 ```javascript
