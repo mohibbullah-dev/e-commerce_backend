@@ -24,6 +24,6 @@ if (!(error instanceof apiError))
 
 _answer is_ : javascript allway execute first in bracket, then outer if here used like `!error instanceof apiError` it will completely break the logic (!error = false then others).
 
-- 3 i had face issue in db query like **404 user not found** even though query was okay. _The issue was_ : 1 db name was't intu url. 2 collection name and model name was't same.
+- 3 i had face issue in db query like **404 user not found** even though query was okay. The issue was : 1 db name was't intu url. 2 collection name and model name was't same.
 
 - i had to face the in hashpassword fn and pre method in `user.model.js`, i had use `this` in error fn was wrong.

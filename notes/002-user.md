@@ -14,3 +14,8 @@ userSchema.methods.toJSON = function () {
 ```
 
 - `authMiddleware` & `roleMidleware` added
+
+## login
+
+- admin_login api done
+- seller_login api done

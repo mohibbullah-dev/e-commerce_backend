@@ -17,30 +17,44 @@ const userSchema = new Schema(
     password: {
       type: String,
       trim: true,
+      select: false,
       required: true,
     },
     role: {
       type: String,
+      enum: ["admin", "seller", "user"],
+      default: "user",
       required: true,
     },
     avater: {
       url: {
         type: String,
-        required: true,
+        default: null,
       },
       public_id: {
         type: String,
-        required: true,
+        default: null,
       },
+    },
+    status: {
+      type: String,
+      enum: ["pending", "active", "inactive"],
+      default: "pending",
+      required: true,
+    },
+    method: {
+      type: String,
+      enum: ["google", "manually"],
+      default: "manually",
+      required: true,
     },
   },
   { timestamps: true },
 );
 
 userSchema.pre("save", async function (next) {
-  if (this.isModified("password")) return next();
+  if (!this.isModified("password")) return;
   this.password = await bcrypt.hash(this.password, 10);
-  next();
 });
 
 userSchema.methods.isCorrectPassword = async function (password) {

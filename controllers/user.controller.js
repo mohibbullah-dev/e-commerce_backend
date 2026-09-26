@@ -52,8 +52,8 @@ const sellerRegister = asyncHander(async (req, res) => {
   if ([name, email, password].some((fields) => fields.trim() === "")) {
     throw new apiError(400, "all fields are required!");
   }
-  const isSellerExist = await User.findOne({ email });
-  if (isSellerExist) throw new apiError(400, "seller already exists!");
+  // const isSellerExist = await User.findOne({ email });
+  // if (isSellerExist) throw new apiError(400, "seller already exists!");
 
   const seller = await User.create({
     name,
@@ -146,8 +146,8 @@ const userRegister = asyncHander(async (req, res) => {
   if ([name, email, password].some((fields) => fields === ""))
     throw new apiError(400, "all fields are required!");
 
-  const userExists = await User.findOne({ email }).select("-password");
-  if (userExists) throw new apiError(400, "user already exsits");
+  // const userExists = await User.findOne({ email }).select("-password");
+  // if (userExists) throw new apiError(400, "user already exsits");
   const user = await User.create({
     name,
     email,
