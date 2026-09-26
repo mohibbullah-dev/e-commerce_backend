@@ -48,6 +48,7 @@ DB_Connection()
 app.use((err, req, res, next) => {
   let error = err;
 
+  // mongoose schema duplicate field
   if (error.code === 11000) {
     const fieldName = Object.keys(error.keyValue)[0];
 
@@ -62,6 +63,15 @@ app.use((err, req, res, next) => {
       const message = `This ${fieldName} is already existh, pleas try another one`;
       error = new apiError(400, message, [], err.stack);
     }
+  }
+
+  // mongoose schema required field
+  console.log("Error Name:", error.name);
+  if (error.name === "ValidationError") {
+    const missingFields = Object.keys(error.errors);
+
+    const message = `${missingFields.join(", ")} ${missingFields.length > 1 ? "fields are" : "field is"} required!`;
+    error = new apiError(400, message, missingFields, err.stack);
   }
 
   if (!(error instanceof apiError)) {
