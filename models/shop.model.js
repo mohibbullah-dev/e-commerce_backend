@@ -45,10 +45,10 @@ const storeSchema = new Schema(
     },
     email: {
       type: String,
-      lowercase: true,
-      trim: true,
       required: true,
-      uniuqe: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
     },
 
     logo: {

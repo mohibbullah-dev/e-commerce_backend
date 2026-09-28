@@ -7,17 +7,10 @@ const storeCreate = asyncHander(async (req, res) => {
   const { name, email, phone, street, city, state, postalCode, country } =
     req.body;
   const fileUrl = req.file;
-  console.log("file :", fileUrl);
+  // console.log("file :", fileUrl);
+  // const isStoreExists = await Store.findOne({ email });
 
-  if (
-    [name, email, phone, street, city, state, postalCode, country].some(
-      (fields) => fields === "",
-    )
-  )
-    throw new apiError(400, "all fields are required!");
-  const isStoreExists = await Store.findOne({ email });
-
-  if (isStoreExists) throw new apiError(400, "store already exists");
+  // if (isStoreExists) throw new apiError(400, "store already exists");
 
   const store = await Store.create({
     sellerId: req.user?._id,

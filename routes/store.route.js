@@ -7,6 +7,8 @@ import {
 import verifyToken from "../middlewares/auth.middleware.js";
 import authorizedRoole from "../middlewares/role.middleware.js";
 import { uploadImage } from "../middlewares/multer.Middleware.js";
+import validate from "../middlewares/validation.middleware.js";
+import { storeCreateSchema } from "../validator/store.validator.js";
 
 const router = exress.Router();
 
@@ -15,6 +17,7 @@ router.post(
   verifyToken,
   authorizedRoole("seller"),
   uploadImage.single("logo"),
+  validate(storeCreateSchema, "body"),
   storeCreate,
 );
 

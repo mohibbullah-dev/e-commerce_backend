@@ -55,7 +55,7 @@ app.use((err, req, res, next) => {
     if (fieldName === "email") {
       error = new apiError(
         400,
-        "Unable to complete registration. Please check your details.",
+        "Unable to complete creation. Please check your details.",
         [],
         err.stack,
       );
