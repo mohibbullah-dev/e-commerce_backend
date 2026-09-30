@@ -2,12 +2,6 @@ import { z } from "zod";
 
 const addCategorySchema = z.object({
   cat_name: z.string(),
-  image: z
-    .object({
-      url: z.string().nullable().default(null),
-      public_id: z.string().nullable().default(null),
-    })
-    .optional(),
 });
 
 const getCategorySchema = z.object({
@@ -17,3 +11,6 @@ const getCategorySchema = z.object({
 });
 
 export { addCategorySchema, getCategorySchema };
+
+// partial schemas
+export const UpdateCategorySchema = addCategorySchema.partial();

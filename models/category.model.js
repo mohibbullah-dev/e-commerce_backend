@@ -6,6 +6,7 @@ const categorySchema = new Schema(
       type: String,
       required: [true, "name should be unique"],
       unique: true,
+      trim: true,
     },
     category_slug: {
       type: String,

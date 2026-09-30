@@ -66,7 +66,6 @@ app.use((err, req, res, next) => {
   }
 
   // mongoose schema required field
-  console.log("Error Name:", error.name);
   if (error.name === "ValidationError") {
     const missingFields = Object.keys(error.errors);
 
