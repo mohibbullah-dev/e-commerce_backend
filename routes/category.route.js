@@ -35,8 +35,7 @@ router.patch(
 );
 router.get(
   "/get-categories",
-  verifyToken,
-  authorizedRoole("admin"),
+
   validate(getCategorySchema, "query"),
   getCategories,
 );
