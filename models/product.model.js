@@ -25,13 +25,13 @@ const productSchema = new Schema(
       required: [true, "shop id is required"],
     },
     category: {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
+      type: String,
       required: [true, "category is required"],
     },
     name: {
       type: String,
       required: [true, "name is required"],
+      index: true,
     },
     slug: {
       type: String,
@@ -45,8 +45,12 @@ const productSchema = new Schema(
     },
     iamge: [
       {
-        url: { type: String, required: [true, "product image is required"] },
-        public_id: { type: String },
+        url: {
+          type: String,
+          required: [true, "product image is required"],
+          default: null,
+        },
+        public_id: { type: String, default: null },
       },
     ],
 
