@@ -3,7 +3,7 @@ import slugify from "slugify";
 import { nanoid } from "nanoid";
 
 // shop object
-// category object
+// category String
 // name string
 // slug string
 // description
@@ -21,17 +21,18 @@ const productSchema = new Schema(
   {
     shop_id: {
       type: Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Store",
       required: [true, "shop id is required"],
     },
-    category: {
-      type: String,
-      required: [true, "category is required"],
-    },
+
     name: {
       type: String,
       required: [true, "name is required"],
       index: true,
+    },
+    descirption: {
+      type: String,
+      required: [true, "description is required"],
     },
     slug: {
       type: String,
@@ -39,20 +40,33 @@ const productSchema = new Schema(
       unique: true,
       lowercase: true,
     },
-    descirption: {
-      type: String,
-      required: [true, "description is required"],
+
+    category: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: [true, "category is required"],
     },
-    iamge: [
-      {
-        url: {
-          type: String,
-          required: [true, "product image is required"],
-          default: null,
+    images: {
+      type: [
+        {
+          _id: false,
+          url: {
+            type: String,
+            required: [true, "product image is required"],
+          },
+          public_id: {
+            type: String,
+            required: [true, "image public_id is required"],
+          },
         },
-        public_id: { type: String, default: null },
+      ],
+      validate: {
+        validator: function (val) {
+          return val && val.length > 0;
+        },
+        message: "Product must have at least one image",
       },
-    ],
+    },
 
     tags: [
       {
@@ -87,7 +101,7 @@ const productSchema = new Schema(
     },
     ratings_verage: {
       type: Number,
-      required: [true, "ratings_verage is requried"],
+      required: [true, "ratings_average is requried"],
       default: 0,
       min: 0,
       max: 5,
@@ -108,8 +122,8 @@ const productSchema = new Schema(
   { timestamps: true },
 );
 
-productSchema.pre("validate", async () => {
-  if (this.isNew) {
+productSchema.pre("validate", async function () {
+  if (this.isNew || this.isModified("name")) {
     this.slug = `${slugify(this.name, { lower: true, strict: true })}-${nanoid(6)}`;
   }
 });

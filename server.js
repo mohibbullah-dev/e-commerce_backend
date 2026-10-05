@@ -7,6 +7,7 @@ import DB_Connection from "./db/index.js";
 import { apiError } from "./utils/api.error.js";
 import storeRouter from "./routes/store.route.js";
 import categoryRouter from "./routes/category.route.js";
+import productRouter from "./routes/product.route.js";
 
 const app = express();
 app.use(express.json());
@@ -23,6 +24,7 @@ app.use(cookieParser());
 app.use("/api/v1/auth", userRoute);
 app.use("/api/v1/store", storeRouter);
 app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/product", productRouter);
 
 app.get("/", (req, res) => {
   res.send("route is working successfully");
