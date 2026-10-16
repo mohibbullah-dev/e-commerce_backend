@@ -68,8 +68,8 @@ const updateCategory = asyncHander(async (req, res) => {
     );
 });
 
-// get categories
-const getCategories = asyncHander(async (req, res) => {
+// get categories_withPagination
+const getCategories_withPagination = asyncHander(async (req, res) => {
   // get queries from 'req.query'
   // set default value in variable comming frontend (max, min page and limit using Max(), and Min())
   // defin a skip valiable like: limit * (page -1)
@@ -105,6 +105,21 @@ const getCategories = asyncHander(async (req, res) => {
   );
 });
 
+// get catogories_withPagination
+const getCategories = asyncHander(async (req, res) => {
+  const [categories, totalItm] = await Promise.all([
+    Category.find().sort({ createdAt: -1 }),
+    Category.countDocuments(),
+  ]);
+
+  return res.status(200).json(
+    new apiResponse(200, "Fetched all categories", {
+      categories,
+      totalItm,
+    }),
+  );
+});
+
 // delete categories
 const deleteCategory = asyncHander(async (req, res) => {
   const { categor_id } = req.params;
@@ -117,4 +132,10 @@ const deleteCategory = asyncHander(async (req, res) => {
     .json(new apiResponse(200, "Category deleted successfully!", category));
 });
 
-export { addCategory, getCategories, deleteCategory, updateCategory };
+export {
+  addCategory,
+  getCategories_withPagination,
+  getCategories,
+  deleteCategory,
+  updateCategory,
+};
