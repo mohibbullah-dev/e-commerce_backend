@@ -10,9 +10,11 @@ import {
 
 const createProduct = asyncHander(async (req, res) => {
   const sellerId = req.user?._id;
-  const { shop_id } = req.params;
+  console.log("sellerId :", sellerId);
+
   const {
     name,
+    brand_name,
     descirption,
     category,
     tags,
@@ -35,12 +37,16 @@ const createProduct = asyncHander(async (req, res) => {
     return { url: r.secure_url, public_id: r.public_id };
   });
 
-  const shop = await Store.findOne({ sellerId: sellerId, _id: shop_id });
+  const shop = await Store.findOne({ sellerId: sellerId });
+  console.log("shop ", shop);
   if (!shop) throw new apiError(404, "store not found");
+
+  console.log("shop ", shop);
 
   const product = await Product.create({
     shop_id: shop?._id,
     name,
+    brand_name,
     descirption,
     category,
     images,
@@ -61,13 +67,11 @@ const createProduct = asyncHander(async (req, res) => {
 
 const updateProduct = asyncHander(async (req, res) => {
   const { productId } = req.params;
-  const files = req.files;
   const {
     name,
     descirption,
     category,
-    oldTag,
-    newTag,
+    tags,
     orginal_price,
     discounted_price,
     stock,
@@ -82,22 +86,22 @@ const updateProduct = asyncHander(async (req, res) => {
   if (discounted_price) updateData.discounted_price = discounted_price;
   if (stock) updateData.stock = stock;
 
-  if (newTag && oldTag) {
-    queryFilter.tags = oldTag;
-    updateData["tags.$"] = newTag;
+  if (tags) {
+    updateData.tags = tags;
   }
-
-  let update;
 
   if (Object.keys(updateData).length > 0) {
-    update = await Product.findOneAndUpdate(
-      queryFilter,
-      { $set: updateData },
-      { new: true },
-    );
-    if (!update)
-      throw new apiError(404, "product not found or tag is mismatch");
+    return res
+      .status(200)
+      .json(new apiResponse(200, "nothing to update", null));
   }
+
+  const update = await Product.findOneAndUpdate(
+    queryFilter,
+    { $set: updateData },
+    { new: true },
+  );
+  if (!update) throw new apiError(404, "product not found or tag is mismatch");
 
   return res
     .status(200)
@@ -179,6 +183,7 @@ const updateSingleProductImage = asyncHander(async (req, res) => {
 // single image delete
 
 const deleteSingleProductImage = asyncHander(async (req, res) => {
+  console.log("hello am in deleteSingleProductImage");
   const { imagePublic_id } = req.body;
   const { productId } = req.params;
 
@@ -196,12 +201,15 @@ const deleteSingleProductImage = asyncHander(async (req, res) => {
 
   if (!deletedImage) throw new apiError(404, "product not found");
 
+  await destroyImageFromCloudinary(imagePublic_id);
+
   return res
     .status(200)
     .json(new apiResponse(200, "image deleted successfully", deletedImage));
 });
 
 const deleteProduct = asyncHander(async (req, res) => {
+  console.log("i am in delete product controller");
   const { productid } = req.params;
   if (!productid) throw new apiError(400, "productId is required!");
 
@@ -213,6 +221,90 @@ const deleteProduct = asyncHander(async (req, res) => {
     .json(new apiResponse(200, "product delete successfully", deleteProduct));
 });
 
+const getAll_MyProducts_withPagination = asyncHander(async (req, res) => {
+  const { page, limit, search, tab } = req.validedQuery;
+
+  console.log("page :", page);
+  console.log("limit :", limit);
+  console.log("search :", search);
+  console.log("tab:", tab);
+
+  const skip = (page - 1) * limit;
+
+  const filter = { shop_id: req.store?._id };
+  let project = {};
+  let sort = { createdAt: -1 };
+
+  if (search) {
+    filter.$text = { $search: search };
+    project = { score: { $meta: "textScore" } };
+    sort = { score: { $meta: "textScore" } };
+  }
+  if (tab) {
+    switch (tab) {
+      case "active":
+        filter.status = "active";
+        break;
+
+      case "draft":
+        filter.status = "active";
+        break;
+
+      case "out_of_stock":
+        filter.$or = [{ stock: { $lt: 0 } }, { status: "out_of_stock" }];
+        break;
+
+      case "archived":
+        filter.status = "archived";
+        break;
+
+      case "discounted_price":
+        filter.discounted_price = { $gt: 0 };
+        break;
+
+      case "all":
+      default:
+        break;
+    }
+  }
+
+  const [products, totalProducts] = await Promise.all([
+    Product.find(filter, project)
+      .skip(skip)
+      .sort(sort)
+      .limit(limit)
+      .populate("category", "category_name"),
+    Product.countDocuments(filter),
+  ]);
+
+  return res.status(200).json(
+    new apiResponse(200, "all products fetched", {
+      products,
+      pagination: {
+        currentPage: page,
+        totalPage: Math.ceil(totalProducts / limit),
+        totalProducts,
+        itemPerPage: limit,
+        hasNextPage: page < Math.ceil(totalProducts / limit),
+        hasPrevPage: page > 1,
+      },
+    }),
+  );
+});
+const myProduct = asyncHander(async (req, res) => {
+  const { productId } = req.params;
+
+  if (!productId) throw new apiError(400, "product_id is required");
+  const product = await Product.findById(productId).populate(
+    "category",
+    "category_name _id",
+  );
+  if (!product) throw new apiError(404, "product not found");
+  return res
+    .status(200)
+    .json(new apiResponse(200, "fetched single_product", product));
+});
+
 export {
   createProduct,
   updateProduct,
@@ -220,4 +312,6 @@ export {
   deleteSingleProductImage,
   addSingleProductImage,
   deleteProduct,
+  getAll_MyProducts_withPagination,
+  myProduct,
 };
