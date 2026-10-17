@@ -1,7 +1,12 @@
+import { Store } from "../models/shop.model.js";
 import { User } from "../models/user.model.js";
 import { apiError } from "../utils/api.error.js";
 import { apiResponse } from "../utils/api.response.js";
 import { asyncHander } from "../utils/asyncHander.js";
+import {
+  destroyImageFromCloudinary,
+  uploadImageToCloudinary,
+} from "../utils/upload.js";
 
 const adminLogin = asyncHander(async (req, res) => {
   // get user_info from frontend
@@ -47,6 +52,8 @@ const adminLogin = asyncHander(async (req, res) => {
       }),
     );
 });
+
+// seller
 const sellerRegister = asyncHander(async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -165,8 +172,9 @@ const userLogin = asyncHander(async (req, res) => {
 
   const isPassCorrect = await user.isCorrectPassword(password);
   if (!isPassCorrect) throw new apiError(400, "Incorrect password!");
+  const store = await Store.findOne({ sellerId: user._id });
 
-  const token = await user.generateAccessToken();
+  const token = await user.generateAccessToken(store ? store?._id : null);
 
   const option = {
     httpOnly: true,
@@ -189,6 +197,78 @@ const get_user = asyncHander(async (req, res) => {
     .json(new apiResponse(200, "user fetched successfully", { user }));
 });
 
+const profileInfor_update = asyncHander(async (req, res) => {
+  const { name, email } = req.body;
+
+  const updateData = {};
+
+  if (name) updateData.name = name;
+  updateData.email = email;
+
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    { $set: updateData },
+    { new: true },
+  );
+  if (!user) throw new apiError(404, "user not found");
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, "profile updated successfully", user));
+});
+
+const password_update = asyncHander(async (req, res) => {
+  const { newPassword, oldPassword, email } = req.body;
+  console.log("newPassword :", newPassword);
+  console.log("oldPassword :", oldPassword);
+  console.log("email :", email);
+
+  const user = await User.findOne({ email: email }).select("+password");
+  if (!user) throw new apiError(404, "user not found");
+
+  const isMatch = await user.isCorrectPassword(oldPassword);
+  if (!isMatch) throw new apiError(400, "ole-password not match");
+
+  user.password = newPassword;
+  await user.save();
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, "password updated successfully"));
+});
+
+const avater_update = asyncHander(async (req, res) => {
+  const file = req.file;
+  const { oldImage_publicId } = req.body;
+  console.log("oldImage_publicId :", oldImage_publicId);
+  if (!file) throw new apiError(400, "file is required");
+
+  const result = await uploadImageToCloudinary(file?.path);
+
+  if (!result) throw new apiError(500, "failed to upload image to cloudinary");
+
+  const updated_avater = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        "avater.url": result?.secure_url,
+        "avater.public_id": result?.public_id,
+      },
+    },
+    { returnDocument: "after" }, //{new:true} is deprecated with { returnDocument: "after" }
+  );
+
+  if (!updated_avater) throw new apiError(404, "user not found");
+
+  if (oldImage_publicId) {
+    await destroyImageFromCloudinary(oldImage_publicId);
+  }
+
+  return res
+    .status(200)
+    .json(new apiResponse(200, "avater added successfully", updated_avater));
+});
+
 export {
   adminLogin,
   get_user,
@@ -198,4 +278,7 @@ export {
   sellerReject,
   userRegister,
   userLogin,
+  profileInfor_update,
+  password_update,
+  avater_update,
 };
