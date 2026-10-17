@@ -2,6 +2,7 @@ import e from "express";
 import {
   addCategory,
   deleteCategory,
+  getCategories_withPagination,
   getCategories,
   updateCategory,
 } from "../controllers/category.controller.js";
@@ -11,9 +12,10 @@ import authorizedRoole from "../middlewares/role.middleware.js";
 import validate from "../middlewares/validation.middleware.js";
 import {
   addCategorySchema,
-  getCategorySchema,
   UpdateCategorySchema,
 } from "../validator/category.validator.js";
+import paginationSchema from "../validator/paginationSchema.js";
+
 const router = e.Router();
 
 router.post(
@@ -34,11 +36,12 @@ router.patch(
   updateCategory,
 );
 router.get(
-  "/get-categories",
-
-  validate(getCategorySchema, "query"),
-  getCategories,
+  "/get-categories_withPagination",
+  validate(paginationSchema, "query"),
+  getCategories_withPagination,
 );
+
+router.get("/get-categories", getCategories);
 
 router.delete(
   "/delete-category/:categor_id",
