@@ -30,6 +30,11 @@ const productSchema = new Schema(
       required: [true, "name is required"],
       index: true,
     },
+    brand_name: {
+      type: String,
+      required: [true, "brand_name is required"],
+      index: true,
+    },
     descirption: {
       type: String,
       required: [true, "description is required"],
@@ -127,4 +132,9 @@ productSchema.pre("validate", async function () {
     this.slug = `${slugify(this.name, { lower: true, strict: true })}-${nanoid(6)}`;
   }
 });
+
+productSchema.index(
+  { name: "text", descirption: "text", tags: "text" },
+  { weights: { name: 10, tags: 5, descirption: 1 } },
+);
 export const Product = mongoose.model("Product", productSchema);
