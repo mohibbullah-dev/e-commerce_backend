@@ -22,6 +22,8 @@ const storeCreateSchema = z.object({
   postalCode: z.coerce.number(),
   country: z.string().trim().min(1, "country is required"),
   phone: z.string().min(1, "phone is required"),
+  oldLogoPublic_id: z.string().optional(),
+  oldBannerPublic_id: z.string().optional(),
 });
 
 export { storeCreateSchema };

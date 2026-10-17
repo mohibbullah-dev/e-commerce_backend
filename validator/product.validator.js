@@ -2,6 +2,7 @@ import { z } from "zod";
 
 const createProductSchema = z.object({
   name: z.string().trim().min(1, "product_name is required"),
+  brand_name: z.string().trim().min(1, "brand_name is required"),
   category: z.string().trim().min(1, "category is required"),
   descirption: z.string().trim().min(1, "description is required"),
   orginal_price: z.coerce.number().int().min(0, "orginal_price is required"),
@@ -17,6 +18,10 @@ const createProductSchema = z.object({
   oldImagePublic_id: z.string().trim().optional(),
 });
 
-export { createProductSchema };
+const productIdSchema = z.object({
+  productId: z.string().regex(/^[0-9a-fA-F]{24}$/, "Invalid product id"),
+});
+
+export { createProductSchema, productIdSchema };
 
 export const updateProductSchema = createProductSchema.partial();

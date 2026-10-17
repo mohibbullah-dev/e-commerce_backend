@@ -37,6 +37,7 @@ const storeSchema = new Schema(
     sellerId: {
       type: Schema.Types.ObjectId,
       ref: "User",
+      unique: true,
       required: true,
     },
     name: {

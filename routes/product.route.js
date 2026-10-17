@@ -5,6 +5,7 @@ import { uploadImage } from "../middlewares/multer.Middleware.js";
 import validate from "../middlewares/validation.middleware.js";
 import {
   createProductSchema,
+  productIdSchema,
   updateProductSchema,
 } from "../validator/product.validator.js";
 import {
@@ -12,14 +13,17 @@ import {
   createProduct,
   deleteProduct,
   deleteSingleProductImage,
+  getAll_MyProducts_withPagination,
+  myProduct,
   updateProduct,
   updateSingleProductImage,
 } from "../controllers/product.controller.js";
+import paginationSchema from "../validator/paginationSchema.js";
 
 const router = e.Router();
 
 router.post(
-  "/create-product/:shop_id",
+  "/create-product",
   verifyToken,
   authorizedRoole("seller"),
   uploadImage.array("images", 5),
@@ -66,6 +70,21 @@ router.delete(
   verifyToken,
   authorizedRoole("seller"),
   deleteProduct,
+);
+router.get(
+  "/my-product/:productId",
+  verifyToken,
+  authorizedRoole("seller"),
+  validate(productIdSchema, "params"),
+  myProduct,
+);
+
+router.get(
+  "/get-allProducts_withPagination",
+  verifyToken,
+  authorizedRoole("seller"),
+  validate(paginationSchema, "query"),
+  getAll_MyProducts_withPagination,
 );
 
 export default router;
