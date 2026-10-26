@@ -86,9 +86,19 @@ const orderSchema = new Schema(
         required: true,
       },
       postal_code: {
-        type: Number,
+        type: String,
         required: true,
       },
+    },
+    payment_method: {
+      type: String,
+      enum: ["cod", "stripe"],
+      default: "cod",
+    },
+    payment_status: {
+      type: String,
+      enum: ["pending", "paid", "unpaid", "cancelled"],
+      default: "pending",
     },
   },
   { timestamps: true },
